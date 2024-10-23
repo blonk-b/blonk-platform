@@ -1,0 +1,24 @@
+[package]
+name = "blonk_bot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+teloxide = { version = "0.13.0", features = ["macros", "redis-storage", "cbor-serializer", "sqlite-storage-nativetls"] }
+log = "0.4.22"
+pretty_env_logger = "0.5.0"
+tokio = { version =  "1.40.0", features = ["rt-multi-thread", "macros"] }
+reqwest = { version = "0.12.0", features = ["json"] }
+serde = "1.0.210"
+serde_json = "1.0.128"
+url = "2.5.2"
+solana-sdk = "1.14.23"
+borsh = "1.5.1"
+solana-client = "1.14.23"
+base64 = "0.22.1"
+squads-mpl = "1.3.1"
+anchor-lang = "0.26.0"
+envconfig = "0.11.0"
+anchor-client = "0.26.0"
+bincode = "1.3.3"
+
