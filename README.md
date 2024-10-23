@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./blonk.jpg" width="160" height="160">
+  <img src="blonk.jpg" width="160" height="160">
   <h1> Blonk 🌟 - Radar Hackathon</h1>
   
   <h3>Blinks + Squads Multisig + Telegram</h3>
