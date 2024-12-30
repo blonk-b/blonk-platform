@@ -70,6 +70,9 @@ pub async fn handle_parameters(
                     ));
                 }
 
+                bot.send_message(dialogue.chat_id(), "Processing blink...".to_string())
+                    .await?;
+
                 let multsig_pubkey = get_multisig_pubkey();
                 let transaction_entry =
                     crate::actions::create_transaction(&request_url, multsig_pubkey, data.user_id)

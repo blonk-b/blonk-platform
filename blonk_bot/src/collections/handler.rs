@@ -5,6 +5,7 @@ use teloxide::types::UserId;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct InternalActionData {
     pub actions: Vec<Action>,
+    pub base_url: String,
     pub url: String,
     pub action_title: String,
     pub action_description: String,

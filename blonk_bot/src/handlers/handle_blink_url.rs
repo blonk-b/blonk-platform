@@ -7,11 +7,14 @@ use teloxide::{
     prelude::*,
     types::{InlineKeyboardButton, InlineKeyboardMarkup, ParseMode},
 };
+use url::Url;
 
 pub async fn handle_blink_url(bot: Bot, dialogue: MyDialogue, msg: Message) -> HandlerResult {
     match msg.text() {
         Some(url) => {
             let response = get_blink_metadata(&url.to_string()).await;
+            let parsed_url = Url::parse(url)?;
+            let base_url = format!("{}://{}", parsed_url.scheme(), parsed_url.host().unwrap());
 
             match response {
                 Ok(res) => {
@@ -42,6 +45,7 @@ pub async fn handle_blink_url(bot: Bot, dialogue: MyDialogue, msg: Message) -> H
                                 action_title: res.title,
                                 action_description: res.description,
                                 user_id: msg.from.clone().unwrap().id,
+                                base_url,
                             };
 
                             dialogue
