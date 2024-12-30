@@ -13,6 +13,15 @@ pub async fn handle_external_action(
         _ => return Ok(()),
     };
 
+    if let Err(e) = bot
+        .answer_callback_query(&q.id)
+        .text("Processing request...")
+        .show_alert(false)
+        .await
+    {
+        eprintln!("Failed to answer callback query: {}", e);
+    }
+
     let transaction_entry = crate::requests::get_transaction(button_metadata.transaction_id).await;
     let multisig_pubkey = get_multisig_pubkey();
 
