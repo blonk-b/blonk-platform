@@ -1,5 +1,5 @@
 use crate::collections::{Handler, HandlerResult, InternalActionData, MyDialogue, ParametersData};
-use crate::requests::{get_blink_transaction, get_multisig_account, get_transaction_account};
+use crate::requests::{get_multisig_account, get_transaction_account};
 use crate::utils::{
     get_group_chat_id, get_multisig_pubkey, get_transaction_request_buttons,
     get_transaction_request_message, get_url_root,
@@ -25,16 +25,55 @@ pub async fn handle_internal_action(
                 match parameters {
                     Some(parameters_res) => {
                         if parameters_res.is_empty() {
-                            let multisig_pubkey = get_multisig_pubkey();
-                            let transaction_response =
-                                get_blink_transaction(multisig_pubkey, &data.url).await?;
+                            bot.send_message(dialogue.chat_id(), "Processing blink...".to_string())
+                                .await?;
 
-                            bot.send_message(
-                                dialogue.chat_id(),
-                                transaction_response.transaction.to_string(),
+                            let action_url = format!("{}{}", data.base_url, action.unwrap().href);
+                            let multisig_pubkey = get_multisig_pubkey();
+                            let transaction_entry = crate::actions::create_transaction(
+                                &action_url,
+                                multisig_pubkey,
+                                data.user_id,
                             )
-                            .parse_mode(ParseMode::Html)
-                            .await?;
+                            .await;
+                            let multisig_account = get_multisig_account(multisig_pubkey).await;
+                            let threshold = multisig_account.threshold;
+                            let transaction_account = get_transaction_account(
+                                multisig_pubkey,
+                                transaction_entry.transaction_index,
+                            )
+                            .await;
+
+                            let template = get_transaction_request_message(
+                                data.action_title,
+                                data.action_description,
+                                None,
+                                transaction_entry.transaction_index,
+                            );
+
+                            let buttons = get_transaction_request_buttons(
+                                transaction_entry.id,
+                                threshold,
+                                1,
+                                0,
+                                &transaction_account.status,
+                            );
+
+                            let group_chat_id = get_group_chat_id();
+                            let group_message = bot
+                                .send_message(group_chat_id, template)
+                                .parse_mode(ParseMode::Html)
+                                .reply_markup(InlineKeyboardMarkup::new([buttons]))
+                                .await?;
+
+                            crate::requests::update_transaction(
+                                transaction_entry.id,
+                                group_message.id,
+                            )
+                            .await;
+
+                            bot.send_message(dialogue.chat_id(), "Transaction sent!".to_string())
+                                .await?;
 
                             dialogue.exit().await?;
                         } else {
@@ -97,6 +136,8 @@ pub async fn handle_internal_action(
                         }
                     }
                     None => {
+                        // TODO: Does it ever gets here?
+
                         let multisig_pubkey = get_multisig_pubkey();
                         let transaction_entry = crate::actions::create_transaction(
                             &data.url,
